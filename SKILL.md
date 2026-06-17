@@ -135,9 +135,11 @@ public User findByUsername(String username) {
 ## 导入到 CoderTools
 
 生成 JSON 文件后，用户可通过以下步骤导入：
-1. 在 IntelliJ IDEA 中打开 **Chains** 侧边栏
-2. 点击 **导入** 按钮
-3. 选择生成的 `.json` 文件
-4. 链路将出现在侧边栏中，编辑器中会显示 gutter 标记
+
+1. 在 IntelliJ IDEA 中下载并安装 **CoderTools** 插件（Plugins 市场搜索 "CoderTools"）
+2. 在 IntelliJ IDEA 中打开 **Chains** 侧边栏
+3. 点击 **导入** 按钮
+4. 选择生成的 `.json` 文件
+5. 链路将出现在侧边栏中，编辑器中会显示 gutter 标记
 
 如果已存在同名链路，会自动添加后缀如 " (1)"。

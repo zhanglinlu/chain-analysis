@@ -13,6 +13,7 @@ metadata:
 
 生成名为 `chain-<链路名>.json` 的 JSON 文件，结构如下：
 
+Windows 示例：
 ```json
 {
   "chains": [
@@ -21,7 +22,28 @@ metadata:
       "color": "#3498DB",
       "steps": [
         {
-          "filePath": "src/main/java/com/example/controller/UserController.java",
+          "filePath": "C:/Users/xxx/project/src/main/java/com/example/controller/UserController.java",
+          "lineNumber": 25,
+          "className": "UserController",
+          "moduleName": "user-service",
+          "remark": "接收HTTP请求"
+        }
+      ]
+    }
+  ]
+}
+```
+
+macOS/Linux 示例：
+```json
+{
+  "chains": [
+    {
+      "name": "描述性链路名称",
+      "color": "#3498DB",
+      "steps": [
+        {
+          "filePath": "/Users/xxx/project/src/main/java/com/example/controller/UserController.java",
           "lineNumber": 25,
           "className": "UserController",
           "moduleName": "user-service",
@@ -41,7 +63,7 @@ metadata:
 | `chains[].name` | 是 | 链路名称（如"用户登录流程"） |
 | `chains[].color` | 否 | 十六进制颜色代码，缺省为 `#808080` |
 | `chains[].steps` | 是 | 步骤对象数组（可以为空） |
-| `steps[].filePath` | 是 | **项目相对路径**，如 `src/main/java/pkg/Foo.java` |
+| `steps[].filePath` | 是 | **项目绝对路径**，根据当前操作系统生成对应格式（Windows: `C:/Users/xxx/project/src/main/java/pkg/Foo.java`；macOS/Linux: `/Users/xxx/project/src/main/java/pkg/Foo.java`）。先读取项目根目录（`.git` 所在目录或 IDEA 项目根），拼接出完整路径 |
 | `steps[].lineNumber` | 是 | 目标方法/类声明的行号（1-based） |
 | `steps[].className` | 否 | 类名或函数名 |
 | `steps[].moduleName` | 否 | 模块名或包名 |
@@ -60,7 +82,7 @@ metadata:
 1. **识别入口点**：找到执行路径的起始点（Controller 处理方法、API 端点、main 方法、事件监听器等）
 
 2. **追踪调用链路**：沿方法调用逐层追踪。对每个关键方法调用：
-   - 记录**精确的文件路径**（项目相对路径）
+   - 记录**精确的文件绝对路径**（根据操作系统格式：Windows 用 `C:/...`，macOS/Linux 用 `/...`；路径分隔符统一使用 `/`）
    - 记录方法**声明位置**的精确行号（不是调用位置）
    - 用简短的 **remark** 描述该步骤的职责
 
@@ -99,7 +121,7 @@ public User findByUsername(String username) {
 }
 ```
 
-输出应为：
+输出应为（Windows）：
 
 ```json
 {
@@ -109,19 +131,52 @@ public User findByUsername(String username) {
       "color": "#E74C3C",
       "steps": [
         {
-          "filePath": "src/main/java/com/example/controller/UserController.java",
+          "filePath": "C:/work/my-project/src/main/java/com/example/controller/UserController.java",
           "lineNumber": 25,
           "className": "UserController",
           "remark": "接收登录请求"
         },
         {
-          "filePath": "src/main/java/com/example/service/UserService.java",
+          "filePath": "C:/work/my-project/src/main/java/com/example/service/UserService.java",
           "lineNumber": 42,
           "className": "UserService",
           "remark": "验证用户凭证"
         },
         {
-          "filePath": "src/main/java/com/example/repository/UserRepository.java",
+          "filePath": "C:/work/my-project/src/main/java/com/example/repository/UserRepository.java",
+          "lineNumber": 18,
+          "className": "UserRepository",
+          "remark": "查询用户数据（到达数据层边界）"
+        }
+      ]
+    }
+  ]
+}
+```
+
+输出应为（macOS/Linux）：
+
+```json
+{
+  "chains": [
+    {
+      "name": "用户登录流程",
+      "color": "#E74C3C",
+      "steps": [
+        {
+          "filePath": "/Users/xxx/work/my-project/src/main/java/com/example/controller/UserController.java",
+          "lineNumber": 25,
+          "className": "UserController",
+          "remark": "接收登录请求"
+        },
+        {
+          "filePath": "/Users/xxx/work/my-project/src/main/java/com/example/service/UserService.java",
+          "lineNumber": 42,
+          "className": "UserService",
+          "remark": "验证用户凭证"
+        },
+        {
+          "filePath": "/Users/xxx/work/my-project/src/main/java/com/example/repository/UserRepository.java",
           "lineNumber": 18,
           "className": "UserRepository",
           "remark": "查询用户数据（到达数据层边界）"

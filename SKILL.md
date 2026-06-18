@@ -81,18 +81,21 @@ macOS/Linux 示例：
 
 1. **识别入口点**：找到执行路径的起始点（Controller 处理方法、API 端点、main 方法、事件监听器等）
 
-2. **追踪调用链路**：沿方法调用逐层追踪。对每个关键方法调用：
+2. **追踪调用链路**：沿方法调用逐层追踪。对每个关键方法调用，需要添加**两个步骤**：
+   - **调用处步骤**：记录调用代码所在的位置（即 `xxxService.method()` 这行代码的行号和文件），remark 描述"调用xxxService.method做什么"
+   - **声明处步骤**：记录目标方法声明/定义的位置（即方法签名所在的行号和文件），remark 描述该方法"做什么"
    - 记录**精确的文件绝对路径**（根据操作系统格式：Windows 用 `C:/...`，macOS/Linux 用 `/...`；路径分隔符统一使用 `/`）
-   - 记录方法**声明位置**的精确行号（不是调用位置）
    - 用简短的 **remark** 描述该步骤的职责
 
-3. **处理跨文件调用**：当调用跨入另一个文件时，记录目标文件和目标方法的声明行号。
+3. **处理跨文件调用**：当调用跨入另一个文件时，调用处步骤和声明处步骤分别记录各自的文件和行号。同一文件内的调用如果跳转距离较近（如同一类内调私有方法），可合并为一个声明处步骤，省略调用处步骤。
 
-4. **处理异步/事件驱动路径**：对 `@Async`、`@EventListener`、消息队列处理器等，作为单独步骤记录，在 remark 中注明异步性质。
+4. **入口点特殊处理**：链路的第一个步骤（入口点）只需记录声明处，无需额外记录调用处（因为没有上层调用者）。
 
-5. **处理分支**：如果代码有条件分支（如成功路径 vs 错误路径），聚焦主路径/正常路径。如用户需要，可为替代路径创建单独链路。
+5. **处理异步/事件驱动路径**：对 `@Async`、`@EventListener`、消息队列处理器等，作为单独步骤记录，在 remark 中注明异步性质。
 
-6. **停止条件**：遇到以下情况停止追踪：
+6. **处理分支**：如果代码有条件分支（如成功路径 vs 错误路径），聚焦主路径/正常路径。如用户需要，可为替代路径创建单独链路。
+
+7. **停止条件**：遇到以下情况停止追踪：
    - 调用到达框架/库边界（如 `JdbcTemplate.query()`、`RestTemplate.exchange()`）
    - 调用到达外部服务边界
    - 代码返回值且后续无有意义的处理
@@ -105,12 +108,12 @@ macOS/Linux 示例：
 // UserController.java:25
 @PostMapping("/login")
 public Result login(@RequestBody LoginRequest req) {
-    return userService.authenticate(req);
+    return userService.authenticate(req);  // 调用处在 line 27
 }
 
 // UserService.java:42
 public Result authenticate(LoginRequest req) {
-    User user = userRepository.findByUsername(req.getUsername());
+    User user = userRepository.findByUsername(req.getUsername());  // 调用处在 line 43
     if (user == null) throw new AuthException();
     // ...
 }
@@ -137,10 +140,22 @@ public User findByUsername(String username) {
           "remark": "接收登录请求"
         },
         {
+          "filePath": "C:/work/my-project/src/main/java/com/example/controller/UserController.java",
+          "lineNumber": 27,
+          "className": "UserController",
+          "remark": "调用userService.authenticate验证用户"
+        },
+        {
           "filePath": "C:/work/my-project/src/main/java/com/example/service/UserService.java",
           "lineNumber": 42,
           "className": "UserService",
           "remark": "验证用户凭证"
+        },
+        {
+          "filePath": "C:/work/my-project/src/main/java/com/example/service/UserService.java",
+          "lineNumber": 43,
+          "className": "UserService",
+          "remark": "调用userRepository.findByUsername查询用户"
         },
         {
           "filePath": "C:/work/my-project/src/main/java/com/example/repository/UserRepository.java",
@@ -170,10 +185,22 @@ public User findByUsername(String username) {
           "remark": "接收登录请求"
         },
         {
+          "filePath": "/Users/xxx/work/my-project/src/main/java/com/example/controller/UserController.java",
+          "lineNumber": 27,
+          "className": "UserController",
+          "remark": "调用userService.authenticate验证用户"
+        },
+        {
           "filePath": "/Users/xxx/work/my-project/src/main/java/com/example/service/UserService.java",
           "lineNumber": 42,
           "className": "UserService",
           "remark": "验证用户凭证"
+        },
+        {
+          "filePath": "/Users/xxx/work/my-project/src/main/java/com/example/service/UserService.java",
+          "lineNumber": 43,
+          "className": "UserService",
+          "remark": "调用userRepository.findByUsername查询用户"
         },
         {
           "filePath": "/Users/xxx/work/my-project/src/main/java/com/example/repository/UserRepository.java",
